@@ -1,8 +1,40 @@
 <script setup>
-import { defineEmits, defineProps } from 'vue'
+import { defineEmits, defineProps, nextTick, ref } from 'vue'
 
-const { todo } = defineProps(['todo'])
+const props = defineProps(['todo'])
 const emit = defineEmits(['delete'])
+
+const editing = ref(false)
+const titleField = ref(null)
+const newTitle = ref(props.todo.title)
+
+const startEditing = async () => {
+	newTitle.value = props.todo.title
+	editing.value = true
+
+	await nextTick()
+
+	if (titleField.value) {
+		titleField.value.focus()
+	}
+}
+
+const rename = () => {
+	if (!editing.value) return
+
+	editing.value = false
+
+	if (newTitle.value === props.todo.title) {
+		return
+	}
+
+	if (!newTitle.value) {
+		emit('delete')
+		return
+	}
+
+	emit('update', { ...props.todo, title: newTitle.value })
+}
 </script>
 
 <template>
@@ -16,15 +48,21 @@ const emit = defineEmits(['delete'])
 			/>
 		</label>
 
-		<form v-if="false">
+		<form v-if="editing" @submit.prevent="rename">
 			<input
+				ref="titleField"
+				v-model.trim="newTitle"
+				@blur="rename"
 				class="todo__title-field"
 				placeholder="Empty todo will be deleted"
+				@keyup.escape="editing = false"
 			/>
 		</form>
 
 		<template v-else>
-			<span class="todo__title">{{ todo.title }}</span>
+			<span class="todo__title" @dblclick="startEditing">
+				{{ todo.title }}
+			</span>
 			<button class="todo__remove" @click="emit('delete')">×</button>
 		</template>
 

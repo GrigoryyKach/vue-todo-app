@@ -1,8 +1,8 @@
 <script setup>
 import { computed, onBeforeMount, ref, watch } from 'vue'
 
-import StatusFilter from "./components/StatusFilter.vue";
-import TodoItem from './components/TodoItem.vue';
+import StatusFilter from './components/StatusFilter.vue'
+import TodoItem from './components/TodoItem.vue'
 
 const todos = ref([])
 
@@ -82,62 +82,27 @@ watch(
 				</form>
 			</header>
 
-      <TodoItem 
-        v-for="todo of visibleTodos"
-        :key="todo.id"
-        :todo="todo"
-        @delete="todos.splice(todos.indexOf(todo), 1)"
-        @update="todos[todos.indexOf(todo)] = $event"
-      />
-
-			<!-- <section class="todoapp__main" data-cy="TodoList">
-				<div
-					v-for="(todo, i) of visibleTodos"
+			<TransitionGroup
+				tag="section"
+				name="todolist"
+				class="todoapp__main"
+				v-if="todos.length > 0"
+			>
+				<TodoItem
+					v-for="todo of visibleTodos"
 					:key="todo.id"
-					class="todo"
-					:class="{ completed: todo.completed }"
-				>
-					<label class="todo__status-label">
-						<input
-							type="checkbox"
-							class="todo__status"
-							:checked="todo.completed"
-							v-model="todo.completed"
-						/>
-					</label>
-
-					<form v-if="false">
-						<input
-							type="text"
-							class="todo__title-field"
-							placeholder="Empty todo will be deleted"
-						/>
-					</form>
-
-					<template v-else>
-						<span class="todo__title">{{ todo.title }}</span>
-						<button
-							type="button"
-							class="todo__remove"
-							@click="todos.splice(i, 1)"
-						>
-							×
-						</button>
-					</template>
-
-					<div class="modal overlay" :class="{ 'is-active': false }">
-						<div class="modal-background has-background-white-ter"></div>
-						<div class="loader"></div>
-					</div>
-				</div>
-			</section> -->
+					:todo="todo"
+					@delete="todos.splice(todos.indexOf(todo), 1)"
+					@update="Object.assign(todo, $event)"
+				/>
+			</TransitionGroup>
 
 			<footer class="todoapp__footer" data-cy="Footer">
 				<span class="todo-count" data-cy="TodosCounter">
 					{{ activeTodos.length }} items left
 				</span>
 
-				<StatusFilter v-model="status"/>
+				<StatusFilter v-model="status" />
 
 				<button
 					type="button"
@@ -159,3 +124,17 @@ watch(
 		</div>
 	</div>
 </template>
+
+<style scoped>
+.todolist-enter-active,
+.todolist-leave-active {
+	max-height: 60px;
+	transition: all 0.5s ease;
+}
+.todolist-enter-from,
+.todolist-leave-to {
+	opacity: 0;
+	max-height: 0;
+	transform: scaleY(0);
+}
+</style>
